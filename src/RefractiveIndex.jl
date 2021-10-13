@@ -3,7 +3,7 @@ module RefractiveIndex
 using Pkg.Artifacts
 using YAML
 using Interpolations
-using HTTP.URIs: unescapeuri
+# using HTTP.URIs: unescapeuri
 using Unitful: @u_str, uparse, uconvert, ustrip, AbstractQuantity
 using Memoize
 using DelimitedFiles: readdlm
@@ -22,40 +22,23 @@ const RI_LIB = Dict{Tuple{String, String, String}, NamedTuple{(:name, :path), Tu
 #     path::String
 # end
 
-function __init__()
-    RI_INFO_ROOT[] = joinpath(artifact"refractiveindex.info", "refractiveindex.info-database-2020-01-19", "database")
-
-    lib = YAML.load_file(joinpath(RI_INFO_ROOT[], "library.yml"), dicttype=Dict{String, Any})
-    for shelf in lib
-        shelfname = shelf["SHELF"]
-        for book in shelf["content"]
-            haskey(book, "DIVIDER") && continue
-            bookname = book["BOOK"]
-            for page in book["content"]
-                haskey(page, "DIVIDER") && continue
-                pagename = string(page["PAGE"])
-                RI_LIB[(shelfname, bookname, pagename)] =(name = page["name"], path=page["data"])
-            end
-        end
-    end
-
-end
-
-# const database = Dict{Tuple{String, String, String}, Entry}()
-# RI_INFO_ROOT[] = joinpath(artifact"database","refractiveindex.info-database-2020-01-19", "database")
+# function __init__()
+#     RI_INFO_ROOT[] = joinpath(artifact"refractiveindex.info", "refractiveindex.info-database-2020-01-19", "database")
 #
-# lib = YAML.load_file(joinpath(RI_INFO_ROOT[], "library.yml"), dicttype=Dict{String, Any})
-# for shelf in lib
-#     shelfname = shelf["SHELF"]
-#     for book in shelf["content"]
-#         haskey(book, "DIVIDER") && continue
-#         bookname = book["BOOK"]
-#         for page in book["content"]
-#             haskey(page, "DIVIDER") && continue
-#             pagename = string(page["PAGE"])
-#             database[(shelfname, bookname, pagename)] = Entry(page["name"],  joinpath(RI_INFO_ROOT[], "data", page["data"]))
+#     lib = YAML.load_file(joinpath(RI_INFO_ROOT[], "library.yml"), dicttype=Dict{String, Any})
+#     for shelf in lib
+#         shelfname = shelf["SHELF"]
+#         for book in shelf["content"]
+#             haskey(book, "DIVIDER") && continue
+#             bookname = book["BOOK"]
+#             for page in book["content"]
+#                 haskey(page, "DIVIDER") && continue
+#                 pagename = string(page["PAGE"])
+#                 RI_LIB[(shelfname, bookname, pagename)] =(name = page["name"], path=page["data"])
+#             end
 #         end
 #     end
+#
 # end
 
 
