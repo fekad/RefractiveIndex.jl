@@ -1,4 +1,4 @@
-name = "RefractiveIndex"
+name = "RefractiveIndexDatabase"
 uuid = "e8c1deb8-2bb8-11ec-1cb4-87e0a0eb54e3"
 authors = ["Adam Fekete"]
 version = "0.0.1"

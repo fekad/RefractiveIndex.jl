@@ -1,6 +1,3 @@
-abstract type Dispersion end
-abstract type Formula <: Dispersion end
-abstract type Tabulated <: Dispersion end
 
 const ITP_TYPE = typeof(LinearInterpolation(sort(rand(2)), zeros(2)))
 
