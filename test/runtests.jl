@@ -1,6 +1,16 @@
 using RefractiveIndex
 using Test
 
+
+
+# path = "src/Johnson.yml"
+# path = "src/BAF2.yml"
+# m = load_file(path)
+#
+# path = "https://refractiveindex.info/database/data/main/Ag/Johnson.yml"
+# load_url(path)
+#
+
 # function midrange(material)
 #     λmin, λmax = material.λrange
 #     return λmin + 0.5(λmax - λmin)

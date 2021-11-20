@@ -1,55 +1,131 @@
-module RefractiveIndexDatabase
+module RefractiveIndex
 
 # using Pkg.Artifacts
+
+using Dierckx:Spline1D
+
+abstract type Formula end
+abstract type RefractiveIndexInfo end
+
+include("formulas.jl")
+
 using YAML
-using Interpolations
-# using HTTP.URIs: unescapeuri
-# using Unitful: @u_str, uparse, uconvert, ustrip, AbstractQuantity
-# using Memoize
-using DelimitedFiles: readdlm
+using HTTP:request
+using DelimitedFiles:readdlm
+export load_file, load_url
 
-import Base: getindex, show
+include("interfaces.jl")
 
-export RefractiveMaterial
-export load_file
 
-abstract type Dispersion end
-abstract type Formula <: Dispersion end
-abstract type Tabulated <: Dispersion end
-
-struct MaterialEntry{DF<:Dispersion}
-    shelf::String
-    book::String
-    page::String
-end
-
-struct MaterialMetadata
-    name::String
+struct Metadata
     reference::String
     comment::String
-    specs::Dict{Symbol, Any}
+    specs::Dict{Any,Any}
 end
 
-# https://en.m.wikipedia.org/wiki/Refractive_index
-struct RefractiveIndex{DF<:Dispersion}
-    n::DF
-    k::DF
-    λrange::Tuple{Float64, Float64}
+struct RealFormula <: RefractiveIndexInfo
+    meta::Metadata
+    n::Formula
 end
 
-struct RefractiveIndex2{DF<:Dispersion}
-    n::ComplexF64
-    λrange::Tuple{Float64, Float64}
+
+struct ComplexFormula <: RefractiveIndexInfo
+    meta::Metadata
+    n::Formula
+    k::Tabulated
 end
 
-struct Permitivity{}
-    eps::Complex
-    λrange::Tuple{Float64, Float64}
+
+struct RealTabulated <: RefractiveIndexInfo
+    metadata::Metadata
+    λ::Vector{Float64}
+    n::Vector{Float64}
+    _n_itp::Spline1D
+
+    function RealTabulated(metadata, λ, n)
+        @assert length(λ) == length(n)
+        _n_itp = Spline1D(λ, n, bc="error") # error on ectrapolation
+        return new(metadata, λ, n, _n_itp)
+    end
 end
 
-include("parse.jl")
-include("dispersions.jl")
+struct ComplexTabulated <: RefractiveIndexInfo
+    metadata::Metadata
+    λ::Vector{Float64}
+    n::Vector{Float64}
+    k::Vector{Float64}
+    _n_itp::Spline1D
+    _k_itp::Spline1D
 
+    function ComplexTabulated(metadata, λ, n, k)
+        @assert length(λ) == length(n) == length(k)
+
+        _n_itp = Spline1D(λ, n, bc="error") # error on ectrapolation
+        _k_itp = Spline1D(λ, n, bc="error") # error on ectrapolation
+        return new(metadata, λ, n, k, _n_itp, _k_itp)
+    end
+end
+
+(f::RealFormula)(λ) = f.n(λ)
+(f::ComplexFormula)(λ) = f.n(λ) + f.k(λ)
+
+(f::RealTabulated)(λ) = f._n_itp(λ)
+(f::ComplexTabulated)(λ) = f._n_itp(λ) + f._k_itp(λ)
+
+
+
+
+
+#
+# using YAML
+# using Interpolations
+# # using HTTP.URIs: unescapeuri
+# # using Unitful: @u_str, uparse, uconvert, ustrip, AbstractQuantity
+# # using Memoize
+# using DelimitedFiles: readdlm
+#
+# import Base: getindex, show
+#
+# export RefractiveMaterial
+# export load_file
+#
+# abstract type Dispersion end
+# abstract type Formula <: Dispersion end
+# abstract type Tabulated <: Dispersion end
+#
+# struct MaterialEntry{DF<:Dispersion}
+#     shelf::String
+#     book::String
+#     page::String
+# end
+#
+# struct MaterialMetadata
+#     name::String
+#     reference::String
+#     comment::String
+#     specs::Dict{Symbol, Any}
+# end
+#
+# # https://en.m.wikipedia.org/wiki/Refractive_index
+# struct RefractiveIndex{DF<:Dispersion}
+#     n::DF
+#     k::DF
+#     λrange::Tuple{Float64, Float64}
+# end
+#
+# struct RefractiveIndex2{DF<:Dispersion}
+#     n::ComplexF64
+#     λrange::Tuple{Float64, Float64}
+# end
+#
+# struct Permitivity{}
+#     eps::Complex
+#     λrange::Tuple{Float64, Float64}
+# end
+#
+# include("parse.jl")
+# include("dispersions.jl")
+#
 
 
 # """
