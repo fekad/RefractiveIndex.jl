@@ -14,30 +14,13 @@ using Dierckx:Spline1D
 
 
 abstract type Formula end
+abstract type FormulaTabulated end
+
 abstract type RefractiveIndexInfo end
 
-
-struct MaterialCatalog
-    shelf::String
-    book::String
-    page::String
-end
-
-struct MaterialEntry
-    name::String
-    path::String
-end
-
-const DB_ROOT = joinpath("refractiveindex.info-database", "database")
-const DB = Dict{MaterialCatalog,MaterialEntry}()
-
-export get_material
+export get_material, load_file, load_url
 include("database.jl")
-
 include("formulas.jl")
-
-export load_file, load_url
-include("interfaces.jl")
 
 struct Metadata
     reference::String
@@ -46,33 +29,33 @@ struct Metadata
 end
 
 
-struct RealFormula <: RefractiveIndexInfo
+struct FormulaN <: RefractiveIndexInfo
     meta::Metadata
     n::Formula
 end
 
 
-struct ComplexFormula <: RefractiveIndexInfo
+struct FormulaNK <: RefractiveIndexInfo
     meta::Metadata
     n::Formula
     k::Tabulated
 end
 
 
-struct RealTabulated <: RefractiveIndexInfo
+struct TabulatedN <: RefractiveIndexInfo
     metadata::Metadata
     λ::Vector{Float64}
     n::Vector{Float64}
     _n_itp::Spline1D
 
-    function RealTabulated(metadata, λ, n)
+    function TabulatedN(metadata, λ, n)
         @assert length(λ) == length(n)
         _n_itp = Spline1D(λ, n, bc="error") # error on ectrapolation
         return new(metadata, λ, n, _n_itp)
     end
 end
 
-struct ComplexTabulated <: RefractiveIndexInfo
+struct TabulatedNK <: RefractiveIndexInfo
     metadata::Metadata
     λ::Vector{Float64}
     n::Vector{Float64}
@@ -80,7 +63,7 @@ struct ComplexTabulated <: RefractiveIndexInfo
     _n_itp::Spline1D
     _k_itp::Spline1D
 
-    function ComplexTabulated(metadata, λ, n, k)
+    function TabulatedNK(metadata, λ, n, k)
         @assert length(λ) == length(n) == length(k)
 
         _n_itp = Spline1D(λ, n, bc="error") # error on ectrapolation
@@ -89,11 +72,11 @@ struct ComplexTabulated <: RefractiveIndexInfo
     end
 end
 
-(m::RealFormula)(λ::Float64) = m.n(λ)
-(m::ComplexFormula)(λ::Float64) = m.n(λ) + m.k(λ)
+(m::Formula)(λ::Float64) = mN.n(λ)
+(m::FormulaNK)(λ::Float64) = m.n(λ) + m.k(λ)
 
-(m::RealTabulated)(λ::Float64) = m._n_itp(λ)
-(m::ComplexTabulated)(λ::Float64) = m._n_itp(λ) + m._k_itp(λ)
+(m::TabulatedN)(λ::Float64) = m._n_itp(λ)
+(m::TabulatedNK)(λ::Float64) = m._n_itp(λ) + m._k_itp(λ)
 
 
 @memoize _dim_to_micron(dim) = ustrip(uconvert(u"μm", 1.0uparse(dim)))

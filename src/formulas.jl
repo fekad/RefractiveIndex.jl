@@ -1,11 +1,11 @@
+getindex(c::Formula, i) = getindex(c.coefs, i)
 
 struct Sellmeier{N} <: Formula
     λrange::NTuple{2,Float64}
     coeffs::NTuple{N,Float64}
 end
 
-function (f::Sellmeier{N})(λ) where {N}
-    c = f.coeffs
+function (c::Sellmeier{N})(λ) where {N}
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^2 / (λ^2 - c[i + 1]^2)
@@ -18,8 +18,7 @@ struct Sellmeier2{N} <: Formula
     coeffs::NTuple{N,Float64}
 end
 
-function (f::Sellmeier2{N})(λ) where {N}
-    c = f.coeffs
+function (c::Sellmeier2{N})(λ) where {N}
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^2 / (λ^2 - c[i + 1])
@@ -32,8 +31,7 @@ struct Polynomial{N} <: Formula
     coeffs::NTuple{N,Float64}
 end
 
-function (f::Polynomial{N})(λ) where {N}
-    c = f.coeffs
+function (c::Polynomial{N})(λ) where {N}
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^c[i + 1]
@@ -46,8 +44,7 @@ struct RIInfo{N} <: Formula
     coeffs::NTuple{N,Float64}
 end
 
-function (f::RIInfo{N})(λ) where {N}
-    c = f.coeffs
+function (c::RIInfo{N})(λ) where {N}
     rhs = c[1]
     for i = 2:4:min(N, 9)
         rhs += (c[i] * λ^c[i + 1]) / (λ^2 - c[i + 2]^c[i + 3])
@@ -63,8 +60,7 @@ struct Cauchy{N} <: Formula
     coeffs::NTuple{N,Float64}
 end
 
-function (f::Cauchy{N})(λ) where {N}
-    c = f.coeffs
+function (c::Cauchy{N})(λ) where {N}
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^c[i + 1]
@@ -77,8 +73,7 @@ struct Gases{N} <: Formula
     coeffs::NTuple{N,Float64}
 end
 
-function (f::Gases{N})(λ) where {N}
-    c = f.coeffs
+function (c::Gases{N})(λ) where {N}
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] / (c[i + 1] - 1 / λ^2)
@@ -91,8 +86,7 @@ struct Herzberger{N} <: Formula
     coeffs::NTuple{N,Float64}
 end
 
-function (f::Herzberger{N})(λ) where {N}
-    c = f.coeffs
+function (c::Herzberger{N})(λ) where {N}
     rhs = c[1]
     rhs += c[2] / (λ^2 - 0.028)
     rhs += c[3] * (1 / (λ^2 - 0.028))^2
@@ -108,8 +102,7 @@ struct Retro{N} <: Formula
     coeffs::NTuple{N,Float64}
 end
 
-function (f::Retro{N})(λ) where {N}
-    c = f.coeffs
+function (c::Retro{N})(λ) where {N}
     rhs = c[1] + c[2] * λ^2 / (λ^2 - c[3]) + c[4] * λ^2
     return sqrt((-2rhs - 1) / (rhs - 1))
 end
@@ -119,26 +112,25 @@ struct Exotic{N} <: Formula
     coeffs::NTuple{N,Float64}
 end
 
-function (f::Exotic{N})(λ) where {N}
-    c = f.coeffs
+function (c::Exotic{N})(λ) where {N}
     rhs = c[1] + c[2] / (λ^2 - c[3]) + c[4] * (λ - c[5]) / ((λ - c[5])^2 + c[6])
     return sqrt(rhs)
 end
 
 
-struct Tabulated{N} <: Formula
+struct TabulatedK{N} <: Tabulated
     data::Vector{Float64}
     λ::Vector{Float64}
     _itp::Spline1D
 
-    function Tabulated(data, λ)
+    function TabulatedK(data, λ)
         n = length(data)
         itp = Spline1D(data, λ, bc="error") # error on ectrapolation
         return new{n}(data, λ, itp)
     end
 end
 
-function (f::Tabulated)(λ) where {N}
+function (f::TabulatedK)(λ) where {N}
     return f._itp(λ)
 end
 
