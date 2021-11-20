@@ -1,26 +1,20 @@
 name = "RefractiveIndexDatabase"
 uuid = "e8c1deb8-2bb8-11ec-1cb4-87e0a0eb54e3"
 authors = ["Adam Fekete"]
-version = "0.0.1"
+version = "0.0.2"
 
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
-Interpolations = "a98d9a8b-a2ab-59e6-89dd-64a1c18fca59"
+Dierckx = "39dd38d3-220a-591b-8e3c-4c3a8c710a94"
+HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 Memoize = "c03570c3-d221-55d1-a50c-7939bbd78826"
 Pkg = "44cfe95a-1eb2-52ea-b672-e2afdf69b78f"
-Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 Unitful = "1986cc42-f94f-5a68-af5c-568840ba703d"
 YAML = "ddb6d928-2868-570f-bddf-ab3f9cf99eb6"
 
 [compat]
-Interpolations = "0.13"
 Memoize = "0.4"
 Unitful = "1.6"
 YAML = "0.4"
 julia = "1.6"
 
-[extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
-
-[targets]
-test = ["Test"]
