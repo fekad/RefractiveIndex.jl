@@ -1,51 +1,40 @@
-const DB_ROOT = joinpath("refractiveindex.info-database", "database")
-const DB = Dict{Tuple{String, String, String}, MaterialEntry}()
+const DB_ROOT = joinpath(artifact"refractiveindex.info", "refractiveindex.info-database-2021-07-18", "database")
 
 struct MaterialEntry
     name::String
     path::String
-    shelf::String
-    book::String
     book_category::String
-    page::String
     page_category::String
 end
 
+const DB = Dict{Tuple{String, String, String}, MaterialEntry}()
 
-lib = YAML.load_file(joinpath(DB_ROOT, "library.yml"), dicttype=Dict{String,Any})
+function __init__()
 
-last_book_divider, last_page_divider = "", ""
-for shelf in lib
+    lib = YAML.load_file(joinpath(DB_ROOT, "library.yml"), dicttype=Dict{String,Any})
 
-    shelfname = shelf["SHELF"]
-
-    for book in shelf["content"]
-
-        if haskey(book, "DIVIDER")
-            last_book_divider = book["DIVIDER"]
-            continue
-        end
-
-        bookname = book["BOOK"]
-
-        for page in book["content"]
-
-            if haskey(page, "DIVIDER")
-                last_page_divider = page["DIVIDER"]
+    last_book_divider, last_page_divider = "", ""
+    for shelf in lib
+        shelfname = shelf["SHELF"]
+        for book in shelf["content"]
+            if haskey(book, "DIVIDER")
+                last_book_divider = book["DIVIDER"]
                 continue
             end
-
-            pagename = string(page["PAGE"])
-
-            DB[(shelfname, bookname, pagename)] = MaterialEntry(
-                page["name"],
-                page["data"],
-                shelfname,
-                bookname,
-                last_book_divider,
-                pagename,
-                last_page_divider
-            )
+            bookname = book["BOOK"]
+            for page in book["content"]
+                if haskey(page, "DIVIDER")
+                    last_page_divider = page["DIVIDER"]
+                    continue
+                end
+                pagename = string(page["PAGE"])
+                DB[(shelfname, bookname, pagename)] = MaterialEntry(
+                    page["name"],
+                    page["data"],
+                    last_book_divider,
+                    last_page_divider
+                )
+            end
         end
     end
 end
@@ -63,10 +52,7 @@ const FORMULAS = Dict{String,Symbol}(
     "formula 9" => :Exotic,
 )
 
-function str2tuple(str)
-    arr = Base.parse.(Float64, split(str))
-    ntuple(i -> arr[i], length(arr))
-end
+str2vector(str) = Base.parse.(Float64, split(str))
 
 function parse(dict)
 
@@ -84,8 +70,8 @@ function parse(dict)
         data_type = data[1]["type"]
 
         if data_type in keys(FORMULAS)
-            coeffs = str2tuple(data[1]["coefficients"])
-            λrange = str2tuple(data[1]["wavelength_range"])
+            coeffs = str2vector(data[1]["coefficients"])
+            λrange = str2vector(data[1]["wavelength_range"])
             n = eval(FORMULAS[data_type])(λrange, coeffs)
             return FormulaN(meta, n)
 
@@ -105,8 +91,8 @@ function parse(dict)
         @assert data[2]["type"] == "tabulated k"
 
         data_type = data[1]["type"]
-        coeffs = str2tuple(data[1]["coefficients"])
-        λrange = str2tuple(data[1]["wavelength_range"])
+        coeffs = str2vector(data[1]["coefficients"])
+        λrange = str2vector(data[1]["wavelength_range"])
 
         raw = readdlm(IOBuffer(data[2]["data"]), ' ', Float64)
 

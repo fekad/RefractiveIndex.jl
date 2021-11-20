@@ -1,5 +1,7 @@
 module RefractiveIndexDatabase
 
+using Pkg.Artifacts
+
 using YAML
 using HTTP:request
 using DelimitedFiles:readdlm
@@ -10,16 +12,15 @@ import Base: show
 
 using Dierckx:Spline1D
 
-# using Pkg.Artifacts
-
-
-abstract type Formula end
-abstract type FormulaTabulated end
+abstract type RefractiveIndexDefinitons end
+abstract type Formula <: RefractiveIndexDefinitons end
+abstract type Tabulated <: RefractiveIndexDefinitons end
 
 abstract type RefractiveIndexInfo end
 
 export get_material, load_file, load_url
 include("database.jl")
+
 include("formulas.jl")
 
 struct Metadata
@@ -50,7 +51,7 @@ struct TabulatedN <: RefractiveIndexInfo
 
     function TabulatedN(metadata, λ, n)
         @assert length(λ) == length(n)
-        _n_itp = Spline1D(λ, n, bc="error") # error on ectrapolation
+        _n_itp = Spline1D(λ, n, bc="error") # error on extrapolation
         return new(metadata, λ, n, _n_itp)
     end
 end
@@ -65,18 +66,17 @@ struct TabulatedNK <: RefractiveIndexInfo
 
     function TabulatedNK(metadata, λ, n, k)
         @assert length(λ) == length(n) == length(k)
-
-        _n_itp = Spline1D(λ, n, bc="error") # error on ectrapolation
-        _k_itp = Spline1D(λ, n, bc="error") # error on ectrapolation
+        _n_itp = Spline1D(λ, n, bc="error") # error on extrapolation
+        _k_itp = Spline1D(λ, k, bc="error") # error on extrapolation
         return new(metadata, λ, n, k, _n_itp, _k_itp)
     end
 end
 
-(m::Formula)(λ::Float64) = mN.n(λ)
-(m::FormulaNK)(λ::Float64) = m.n(λ) + m.k(λ)
+(m::FormulaN)(λ::Float64) = m.n(λ)
+(m::FormulaNK)(λ::Float64) = m.n(λ) + m.k(λ) * im
 
 (m::TabulatedN)(λ::Float64) = m._n_itp(λ)
-(m::TabulatedNK)(λ::Float64) = m._n_itp(λ) + m._k_itp(λ)
+(m::TabulatedNK)(λ::Float64) = m._n_itp(λ) + m._k_itp(λ) * im
 
 
 @memoize _dim_to_micron(dim) = ustrip(uconvert(u"μm", 1.0uparse(dim)))
@@ -85,11 +85,5 @@ end
 
 
 show(io::IO, ::MIME"text/plain", m::RefractiveIndexInfo) = show(io, typeof(m))
-
-
-# (m::RefractiveIndexInfo{T})(λ::Float64) where {T <: Tabulated}= m.dispersion.n(λ)
-# RefractiveIndex{Formula, Tabulated}
-# RefractiveIndex{Tabulated, Tabulated}
-
 
 end # module

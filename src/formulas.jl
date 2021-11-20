@@ -1,11 +1,10 @@
-getindex(c::Formula, i) = getindex(c.coefs, i)
-
-struct Sellmeier{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct Sellmeier <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::Sellmeier{N})(λ) where {N}
+function (f::Sellmeier)(λ)
+    c, N = f.coeffs, length(f.coeffs)
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^2 / (λ^2 - c[i + 1]^2)
@@ -13,12 +12,13 @@ function (c::Sellmeier{N})(λ) where {N}
     return sqrt(rhs + 1)
 end
 
-struct Sellmeier2{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct Sellmeier2 <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::Sellmeier2{N})(λ) where {N}
+function (f::Sellmeier2)(λ)
+    c, N = f.coeffs, length(f.coeffs)
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^2 / (λ^2 - c[i + 1])
@@ -26,12 +26,13 @@ function (c::Sellmeier2{N})(λ) where {N}
     return sqrt(rhs + 1)
 end
 
-struct Polynomial{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct Polynomial <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::Polynomial{N})(λ) where {N}
+function (f::Polynomial)(λ)
+    c, N = f.coeffs, length(f.coeffs)
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^c[i + 1]
@@ -39,12 +40,13 @@ function (c::Polynomial{N})(λ) where {N}
     return sqrt(rhs)
 end
 
-struct RIInfo{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct RIInfo <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::RIInfo{N})(λ) where {N}
+function (f::RIInfo)(λ)
+    c, N = f.coeffs, length(f.coeffs)
     rhs = c[1]
     for i = 2:4:min(N, 9)
         rhs += (c[i] * λ^c[i + 1]) / (λ^2 - c[i + 2]^c[i + 3])
@@ -55,12 +57,13 @@ function (c::RIInfo{N})(λ) where {N}
     return sqrt(rhs)
 end
 
-struct Cauchy{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct Cauchy <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::Cauchy{N})(λ) where {N}
+function (f::Cauchy)(λ)
+    c, N = f.coeffs, length(f.coeffs)
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^c[i + 1]
@@ -68,12 +71,13 @@ function (c::Cauchy{N})(λ) where {N}
     return rhs
 end
 
-struct Gases{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct Gases <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::Gases{N})(λ) where {N}
+function (f::Gases)(λ)
+    c, N = f.coeffs, length(f.coeffs)
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] / (c[i + 1] - 1 / λ^2)
@@ -81,12 +85,13 @@ function (c::Gases{N})(λ) where {N}
     return rhs + 1
 end
 
-struct Herzberger{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct Herzberger <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::Herzberger{N})(λ) where {N}
+function (f::Herzberger)(λ)
+    c, N = f.coeffs, length(f.coeffs)
     rhs = c[1]
     rhs += c[2] / (λ^2 - 0.028)
     rhs += c[3] * (1 / (λ^2 - 0.028))^2
@@ -97,40 +102,41 @@ function (c::Herzberger{N})(λ) where {N}
     return rhs
 end
 
-struct Retro{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct Retro <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::Retro{N})(λ) where {N}
+function (f::Retro)(λ)
+    c = f.coeffs
     rhs = c[1] + c[2] * λ^2 / (λ^2 - c[3]) + c[4] * λ^2
     return sqrt((-2rhs - 1) / (rhs - 1))
 end
 
-struct Exotic{N} <: Formula
-    λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+struct Exotic <: Formula
+    λrange::Vector{Float64}
+    coeffs::Vector{Float64}
 end
 
-function (c::Exotic{N})(λ) where {N}
+function (f::Exotic)(λ)
+    c = f.coeffs
     rhs = c[1] + c[2] / (λ^2 - c[3]) + c[4] * (λ - c[5]) / ((λ - c[5])^2 + c[6])
     return sqrt(rhs)
 end
 
 
-struct TabulatedK{N} <: Tabulated
+struct TabulatedK <: Tabulated
     data::Vector{Float64}
     λ::Vector{Float64}
     _itp::Spline1D
 
     function TabulatedK(data, λ)
-        n = length(data)
-        itp = Spline1D(data, λ, bc="error") # error on ectrapolation
-        return new{n}(data, λ, itp)
+        itp = Spline1D(data, λ, bc="error") # error on extrapolation
+        return new(data, λ, itp)
     end
 end
 
-function (f::TabulatedK)(λ) where {N}
+function (f::TabulatedK)(λ)
     return f._itp(λ)
 end
 
