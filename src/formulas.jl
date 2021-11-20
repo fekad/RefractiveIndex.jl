@@ -126,13 +126,13 @@ end
 
 
 struct TabulatedK <: Tabulated
-    data::Vector{Float64}
     λ::Vector{Float64}
+    k::Vector{Float64}
     _itp::Spline1D
 
-    function TabulatedK(data, λ)
-        itp = Spline1D(data, λ, bc="error") # error on extrapolation
-        return new(data, λ, itp)
+    function TabulatedK(λ, k)
+        itp = Spline1D(λ, k, bc="error") # error on extrapolation
+        return new(λ, k, itp)
     end
 end
 

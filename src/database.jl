@@ -99,7 +99,7 @@ function parse(dict)
         n = eval(FORMULAS[data_type])(λrange, coeffs)
         k = TabulatedK(eachcol(raw)...)
 
-        return ComplexFormula(meta, n, k)
+        return FormulaNK(meta, n, k)
 
     end
 

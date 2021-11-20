@@ -37,10 +37,16 @@ using Test
         @test isapprox(get_material("main", "ZnO", "Stelling")(0.866), 1.59478654 + 0.01177447im,  rtol=1e-6)
     end
 
-    @testset "Online data" begin
+    @testset "Load data from url" begin
 
         path = "https://refractiveindex.info/database/data/main/Ag/Johnson.yml"
         @test isapprox(load_url(path)(0.49), 0.05087409 + 3.04074578im,  rtol=1e-6)
+
+    end
+    @testset "Load data from file" begin
+
+        path = joinpath(@__DIR__, "data", "BAF2.yml")
+        @test isapprox(load_file(path)(0.82), 1.56104714 + 1.28383192e-8im,  rtol=1e-6)
 
     end
 
