@@ -2,8 +2,9 @@
 
 Provides an offline/online interface to [refractiveindex.info](http://refractiveindex.info).
 
-Database:
-https://github.com/polyanskiy/refractiveindex.info-database
+This package is based on https://github.com/stillyslalom/RefractiveIndex.jl repository.
+
+The source of the database: https://github.com/polyanskiy/refractiveindex.info-database
 
 
 ### Examples
