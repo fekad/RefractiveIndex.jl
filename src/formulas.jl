@@ -1,3 +1,9 @@
+@doc raw"""
+Sellmeier formula:
+```math
+n^2 - 1 = c_1 + \sum \limits_{i=1}^{N} \frac{c_{2i} \lambda^2}{\lambda^2 - c_{2i+1}^2}
+```
+"""
 struct Sellmeier <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}
@@ -12,6 +18,12 @@ function (f::Sellmeier)(λ)
     return sqrt(rhs + 1)
 end
 
+@doc raw"""
+Sellmeier-2 formula:
+```math
+n^2 - 1 = c_1 + \sum \limits_{i=1}^{N} \frac{c_{2i} \lambda^2}{\lambda^2 - c_{2i+1}}
+```
+"""
 struct Sellmeier2 <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}
@@ -26,6 +38,12 @@ function (f::Sellmeier2)(λ)
     return sqrt(rhs + 1)
 end
 
+@doc raw"""
+Polynomial formula:
+```math
+n^2 = c_1 + \sum \limits_{i=1}^{N}  c_{2i} \lambda^{c_{2i+1}}
+```
+"""
 struct Polynomial <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}
@@ -40,6 +58,15 @@ function (f::Polynomial)(λ)
     return sqrt(rhs)
 end
 
+@doc raw"""
+RefractiveIndex.INFO formula:
+```math
+n^2 = c_1
+    + \frac{c_{2} \lambda^{c_{3}}}{\lambda^2 - c_{4}^{c_{5}}}
+    + \frac{c_{6} \lambda^{c_{7}}}{\lambda^2 - c_{8}^{c_{9}}}
+    + \sum \limits_{i=5}^{N} c_{2i} \lambda^{c_{2i+1}}
+```
+"""
 struct RIInfo <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}
@@ -57,6 +84,12 @@ function (f::RIInfo)(λ)
     return sqrt(rhs)
 end
 
+@doc raw"""
+Cauchy formula:
+```math
+n = c_1 + \sum \limits_{i=5}^{N} c_{2i} \lambda^{c_{2i+1}}
+```
+"""
 struct Cauchy <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}
@@ -71,6 +104,13 @@ function (f::Cauchy)(λ)
     return rhs
 end
 
+@doc raw"""
+Gases formula:
+```math
+n - 1 = c_1
+    + \sum \limits_{i=1}^{N} \frac{c_{2i}}{c_{2i+1} - \lambda^{-2} }
+```
+"""
 struct Gases <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}
@@ -85,6 +125,15 @@ function (f::Gases)(λ)
     return rhs + 1
 end
 
+@doc raw"""
+Herzberger formula:
+```math
+n = c_1
+    + \frac{c_{2}}{\lambda^2 - 0.028}
+    + c_{3} \left( \frac{1}{\lambda^2 - 0.028} \right)^2
+    + \sum \limits_{i=1}^{N} c_{i+3} \lambda^{2i}
+```
+"""
 struct Herzberger <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}
@@ -102,6 +151,14 @@ function (f::Herzberger)(λ)
     return rhs
 end
 
+@doc raw"""
+Retro formula:
+```math
+\frac{n^2 - 1}{n^2 +2} = c_1
+    + \frac{c_{2} \lambda^2}{\lambda^2 - c_{3}}
+    +  c_{4} \lambda^2
+```
+"""
 struct Retro <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}
@@ -113,6 +170,14 @@ function (f::Retro)(λ)
     return sqrt((-2rhs - 1) / (rhs - 1))
 end
 
+@doc raw"""
+Exotic formula:
+```math
+n^2 = c_1
+    + \frac{c_{2}}{\lambda^2 - c_{3}}
+    + \frac{c_{4}(\lambda - c_{5})}{(\lambda - c_{5})^2 + c_{6}}
+```
+"""
 struct Exotic <: Formula
     λrange::Vector{Float64}
     coeffs::Vector{Float64}

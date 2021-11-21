@@ -2,14 +2,22 @@ using Documenter
 using RefractiveIndexDatabase
 
 makedocs(
-    sitename = "RefractiveIndexDatabase",
-    format = Documenter.HTML(),
-    modules = [RefractiveIndexDatabase]
+    sitename = "RefractiveIndexDatabase.jl",
+    authors="Adam Fekete <adam.fekete@unamur.be> and contributors",
+    format = Documenter.HTML(
+        prettyurls = get(ENV, "CI", nothing) == "true",
+        canonical="https://fekad.github.io/RefractiveIndexDatabase.jl"
+    ),
+    modules = [RefractiveIndexDatabase],
+    pages=[
+        "Home" => "index.md",
+        "Usage" => "usage.md",
+        "Formualas" => "formulas.md",
+    ]
 )
 
-# Documenter can also automatically deploy documentation to gh-pages.
-# See "Hosting Documentation" and deploydocs() in the Documenter manual
-# for more information.
-#=deploydocs(
-    repo = "<repository url>"
-)=#
+
+deploydocs(
+    repo = "github.com/fekad/RefractiveIndexDatabase.jl",
+    devbranch = "main"
+)

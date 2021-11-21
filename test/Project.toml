@@ -1,2 +1,3 @@
 [deps]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+RefractiveIndexDatabase = "e8c1deb8-2bb8-11ec-1cb4-87e0a0eb54e3"

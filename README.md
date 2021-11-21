@@ -1,5 +1,8 @@
 # RefractiveIndexDatabase
 
+[![](https://img.shields.io/badge/docs-stable-blue.svg)](https://fekad.github.io/RefractiveIndexDatabase.jl/stable)
+[![](https://img.shields.io/badge/docs-dev-blue.svg)](https://fekad.github.io/RefractiveIndexDatabase.jl/dev)
+
 Provides an offline/online interface to [refractiveindex.info](http://refractiveindex.info).
 
 This package is based on https://github.com/stillyslalom/RefractiveIndex.jl repository.

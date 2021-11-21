@@ -107,36 +107,57 @@ function parse(dict)
 end
 
 
-# """
-#     get_material(shelf, book, page)
-#
-# Load the refractive index data for the material corresponding to the specified
-# shelf, book, and page within the [refractiveindex.info](https://refractiveindex.info/) database. The data
-# can be queried by calling the returned object at a given wavelength.
-#
-# # Examples
-# ```julia-repl
-# julia> MgLiTaO3 = get_material("other", "Mg-LiTaO3", "Moutzouris-o")
-# "Mg-LiTaO3 (Moutzouris et al. 2011: n(o) 0.450-1.551 µm; 8 mol.% Mg)"
-#
-# julia> MgLiTaO3(0.45) # default unit is microns
-# 2.2373000025056826
-#
-# julia> using Unitful
-#
-# julia> MgLiTaO3(450u"nm") # auto-conversion from generic Unitful.jl length units
-# 2.2373000025056826
-#
-# julia> MgLiTaO3(450e-9, "m") # strings can be used to specify units (parsing is cached)
-# 2.2373000025056826
-# ```
-# """
+"""
+    get_material(shelf, book, page)
+
+Load the refractive index data for the material corresponding to the specified
+shelf, book, and page within the [refractiveindex.info](https://refractiveindex.info/) database. The data
+can be queried by calling the returned object at a given wavelength.
+
+# Examples
+```julia-repl
+julia> using RefractiveIndexDatabase
+
+julia> MgLiTaO3 = get_material("other", "Mg-LiTaO3", "Moutzouris-o")
+"Mg-LiTaO3 (Moutzouris et al. 2011: n(o) 0.450-1.551 µm; 8 mol.% Mg)"
+
+julia> MgLiTaO3(0.45) # default unit is microns
+2.2373000025056826
+
+julia> using Unitful
+
+julia> MgLiTaO3(450u"nm") # auto-conversion from generic Unitful.jl length units
+2.2373000025056826
+
+julia> MgLiTaO3(450e-9, "m") # strings can be used to specify units (parsing is cached)
+2.2373000025056826
+```
+"""
 function get_material(shelf, book, page)
     item = DB[(shelf, book, page)]
     return load_file(joinpath(DB_ROOT, "data", item.path))
 end
 
+"""
+    load_file(path)
 
+Load the refractive index data for the material corresponding to a YAML
+file within the [refractiveindex.info](https://refractiveindex.info/) database. The data
+can be queried by calling the returned object at a given wavelength.
+
+# Examples
+```julia-repl
+julia> using RefractiveIndexDatabase
+
+julia> path = joinpath(RefractiveIndexDatabase.DB_ROOT, "data", "main", "Ar", "Peck-15C.yml");
+
+julia> Ar = load_file(path)
+RefractiveIndexDatabase.FormulaN
+
+julia> Ar(532, "nm")
+1.0002679711455778
+```
+"""
 function load_file(path)
 
     dict = YAML.load_file(path)
@@ -144,24 +165,24 @@ function load_file(path)
 
 end
 
-# """
-#     load_url(path)
-#
-# Load the refractive index data for the material corresponding to the specified
-# url within the [refractiveindex.info](https://refractiveindex.info/) database. The data
-# can be queried by calling the returned object at a given wavelength.
-#
-# # Examples
-# ```julia-repl
-# julia> using RefractiveIndexDatabase
-#
-# julia> Ar = load_url("https://refractiveindex.info/database/data/main/Ar/Peck-15C.yml")
-# RefractiveIndexDatabase.FormulaN
-#
-# julia> Ar(532, "nm")
-# 1.0002679711455778
-# ```
-# """
+"""
+    load_url(path)
+
+Load the refractive index data for the material corresponding to the specified
+url within the [refractiveindex.info](https://refractiveindex.info/) database. The data
+can be queried by calling the returned object at a given wavelength.
+
+# Examples
+```julia-repl
+julia> using RefractiveIndexDatabase
+
+julia> Ar = load_url("https://refractiveindex.info/database/data/main/Ar/Peck-15C.yml")
+RefractiveIndexDatabase.FormulaN
+
+julia> Ar(532, "nm")
+1.0002679711455778
+```
+"""
 function load_url(path)
 
     r = request("GET", path)
