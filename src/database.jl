@@ -52,7 +52,11 @@ const FORMULAS = Dict{String,Symbol}(
     "formula 9" => :Exotic,
 )
 
-str2vector(str) = Base.parse.(Float64, split(str))
+function str2tuple(str)
+    arr = Base.parse.(Float64, split(str))
+    ntuple(i -> arr[i], length(arr))
+end
+
 
 function parse(dict)
 
@@ -70,8 +74,8 @@ function parse(dict)
         data_type = data[1]["type"]
 
         if data_type in keys(FORMULAS)
-            coeffs = str2vector(data[1]["coefficients"])
-            λrange = str2vector(data[1]["wavelength_range"])
+            coeffs = str2tuple(data[1]["coefficients"])
+            λrange = str2tuple(data[1]["wavelength_range"])
             n = eval(FORMULAS[data_type])(λrange, coeffs)
             return FormulaN(meta, n)
 
@@ -91,8 +95,8 @@ function parse(dict)
         @assert data[2]["type"] == "tabulated k"
 
         data_type = data[1]["type"]
-        coeffs = str2vector(data[1]["coefficients"])
-        λrange = str2vector(data[1]["wavelength_range"])
+        coeffs = str2tuple(data[1]["coefficients"])
+        λrange = str2tuple(data[1]["wavelength_range"])
 
         raw = readdlm(IOBuffer(data[2]["data"]), ' ', Float64)
 

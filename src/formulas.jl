@@ -4,13 +4,13 @@ Sellmeier formula:
 n^2 - 1 = c_1 + \sum \limits_{i=1}^{N} \frac{c_{2i} \lambda^2}{\lambda^2 - c_{2i+1}^2}
 ```
 """
-struct Sellmeier <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct Sellmeier{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::Sellmeier)(λ)
-    c, N = f.coeffs, length(f.coeffs)
+function (f::Sellmeier{N})(λ) where {N}
+    c = f.coeffs
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^2 / (λ^2 - c[i + 1]^2)
@@ -24,13 +24,13 @@ Sellmeier-2 formula:
 n^2 - 1 = c_1 + \sum \limits_{i=1}^{N} \frac{c_{2i} \lambda^2}{\lambda^2 - c_{2i+1}}
 ```
 """
-struct Sellmeier2 <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct Sellmeier2{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::Sellmeier2)(λ)
-    c, N = f.coeffs, length(f.coeffs)
+function (f::Sellmeier2{N})(λ) where {N}
+    c = f.coeffs
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^2 / (λ^2 - c[i + 1])
@@ -44,13 +44,13 @@ Polynomial formula:
 n^2 = c_1 + \sum \limits_{i=1}^{N}  c_{2i} \lambda^{c_{2i+1}}
 ```
 """
-struct Polynomial <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct Polynomial{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::Polynomial)(λ)
-    c, N = f.coeffs, length(f.coeffs)
+function (f::Polynomial{N})(λ) where {N}
+    c = f.coeffs
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^c[i + 1]
@@ -67,13 +67,13 @@ n^2 = c_1
     + \sum \limits_{i=5}^{N} c_{2i} \lambda^{c_{2i+1}}
 ```
 """
-struct RIInfo <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct RIInfo{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::RIInfo)(λ)
-    c, N = f.coeffs, length(f.coeffs)
+function (f::RIInfo{N})(λ) where {N}
+    c = f.coeffs
     rhs = c[1]
     for i = 2:4:min(N, 9)
         rhs += (c[i] * λ^c[i + 1]) / (λ^2 - c[i + 2]^c[i + 3])
@@ -90,13 +90,13 @@ Cauchy formula:
 n = c_1 + \sum \limits_{i=5}^{N} c_{2i} \lambda^{c_{2i+1}}
 ```
 """
-struct Cauchy <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct Cauchy{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::Cauchy)(λ)
-    c, N = f.coeffs, length(f.coeffs)
+function (f::Cauchy{N})(λ) where {N}
+    c = f.coeffs
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] * λ^c[i + 1]
@@ -111,13 +111,13 @@ n - 1 = c_1
     + \sum \limits_{i=1}^{N} \frac{c_{2i}}{c_{2i+1} - \lambda^{-2} }
 ```
 """
-struct Gases <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct Gases{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::Gases)(λ)
-    c, N = f.coeffs, length(f.coeffs)
+function (f::Gases{N})(λ) where {N}
+    c = f.coeffs
     rhs = c[1]
     for i = 2:2:N
         rhs += c[i] / (c[i + 1] - 1 / λ^2)
@@ -134,13 +134,13 @@ n = c_1
     + \sum \limits_{i=1}^{N} c_{i+3} \lambda^{2i}
 ```
 """
-struct Herzberger <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct Herzberger{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::Herzberger)(λ)
-    c, N = f.coeffs, length(f.coeffs)
+function (f::Herzberger{N})(λ) where {N}
+    c = f.coeffs
     rhs = c[1]
     rhs += c[2] / (λ^2 - 0.028)
     rhs += c[3] * (1 / (λ^2 - 0.028))^2
@@ -159,12 +159,12 @@ Retro formula:
     +  c_{4} \lambda^2
 ```
 """
-struct Retro <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct Retro{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::Retro)(λ)
+function (f::Retro{N})(λ) where {N}
     c = f.coeffs
     rhs = c[1] + c[2] * λ^2 / (λ^2 - c[3]) + c[4] * λ^2
     return sqrt((-2rhs - 1) / (rhs - 1))
@@ -178,12 +178,12 @@ n^2 = c_1
     + \frac{c_{4}(\lambda - c_{5})}{(\lambda - c_{5})^2 + c_{6}}
 ```
 """
-struct Exotic <: Formula
-    λrange::Vector{Float64}
-    coeffs::Vector{Float64}
+struct Exotic{N} <: Formula
+    λrange::NTuple{2,Float64}
+    coeffs::NTuple{N,Float64}
 end
 
-function (f::Exotic)(λ)
+function (f::Exotic{N})(λ) where {N}
     c = f.coeffs
     rhs = c[1] + c[2] / (λ^2 - c[3]) + c[4] * (λ - c[5]) / ((λ - c[5])^2 + c[6])
     return sqrt(rhs)

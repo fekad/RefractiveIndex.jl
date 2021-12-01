@@ -30,16 +30,16 @@ struct Metadata
 end
 
 
-struct FormulaN <: RefractiveIndexInfo
+struct FormulaN{T<:Formula} <: RefractiveIndexInfo
     meta::Metadata
-    n::Formula
+    n::T
 end
 
 
-struct FormulaNK <: RefractiveIndexInfo
+struct FormulaNK{T<:Formula} <: RefractiveIndexInfo
     meta::Metadata
-    n::Formula
-    k::Tabulated
+    n::T
+    k::TabulatedK
 end
 
 
