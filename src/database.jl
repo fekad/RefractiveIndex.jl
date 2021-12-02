@@ -7,6 +7,16 @@ struct MaterialEntry
     page_category::String
 end
 
+
+function Base.show(io::IO, ::MIME"text/plain", g::MaterialEntry)
+    println(io, typeof(g))
+    println(io, "  name: ", g.name)
+    println(io, "  book_category: ", g.book_category)
+    println(io, "  page_category: ", g.page_category)
+    print(io,   "  path: ", g.path)
+end
+
+
 const DB = Dict{Tuple{String,String,String},MaterialEntry}()
 
 function __init__()
@@ -256,17 +266,33 @@ Set{Tuple{String, String, String}} with 31 elements:
   ⋮
 ```
 """
-
 function search(; shelf::String = "", book::String = "", page::String = "")
 
     if isempty(shelf) && isempty(book) && isempty(page)
         return Set(keys(DB))
     end
 
-    return Set(filter(
-        (key) -> isin(shelf, key[1]) && isin(book, key[2]) && isin(page, key[3]),
-        keys(DB)
-    ))
+    return Set(filter((key) -> isin(shelf, key[1]) && isin(book, key[2]) && isin(page, key[3]), keys(DB)))
 end
 
 isin(query::String, key::String) = isempty(query) || occursin(query, key)
+
+
+"""
+    info(key)
+
+Return with the metadata for the material corresponding to the given key.
+
+```julia-repl
+julia> info("main", "Ag", "Johnson")
+RefractiveIndexDatabase.MaterialEntry
+  name: Johnson and Christy 1972: n,k 0.188-1.94 µm
+  book_category: Ag - Silver
+  page_category: Experimental data: bulk, thick film
+  path: main/Ag/Johnson.yml
+```
+"""
+function info(key...)
+    return DB[key]
+end
+
