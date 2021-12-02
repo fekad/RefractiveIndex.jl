@@ -18,7 +18,7 @@ abstract type Tabulated <: RefractiveIndexDefinitons end
 
 abstract type RefractiveIndexInfo end
 
-export get_material, load_file, load_url
+export get_material, load_file, load_url, search
 include("database.jl")
 
 include("formulas.jl")

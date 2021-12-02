@@ -7,11 +7,11 @@ struct MaterialEntry
     page_category::String
 end
 
-const DB = Dict{Tuple{String, String, String}, MaterialEntry}()
+const DB = Dict{Tuple{String,String,String},MaterialEntry}()
 
 function __init__()
 
-    lib = YAML.load_file(joinpath(DB_ROOT, "library.yml"), dicttype=Dict{String,Any})
+    lib = YAML.load_file(joinpath(DB_ROOT, "library.yml"), dicttype = Dict{String,Any})
 
     last_book_divider, last_page_divider = "", ""
     for shelf in lib
@@ -194,3 +194,79 @@ function load_url(path)
     return parse(dict)
 
 end
+
+
+"""
+    search(shelf="", book="", page="")
+
+Returns with a set of keys for all materials in the database that match the given query.
+
+```julia-repl
+julia> RefractiveIndexDatabase.search()
+Set{Tuple{String, String, String}} with 2915 elements:
+  ("glass", "HIKARI-F", "F1")
+  ("main", "Au", "Ciesielski")
+  ("glass", "SUMITA-PG", "K-PG375")
+  ("glass", "SUMITA-VC", "K-VC179")
+  ("glass", "SUMITA-SFLD", "K-SFLD11")
+  ("main", "SrF2", "Li")
+  ("glass", "SCHOTT-SK", "N-SK11")
+  ("main", "BaB2O4", "Zhang-o")
+  ("glass", "OHARA-BAH", "BAH54")
+  ("glass", "HIKARI-LaSF", "E-LASFH9")
+  ("main", "ZnTe", "Marple")
+  ("main", "Si", "Green-2008")
+  ("glass", "HOYA-TaF", "M-TAF31")
+  ("main", "C", "Djurisic-e")
+  ("organic", "propanol", "Sani")
+  ("glass", "BARBERINI-sun-protection", "D6420")
+  ("3d", "crystals", "germanium")
+  ("glass", "SCHOTT-SK", "P-SK60")
+  ("glass", "SUMITA-GIR", "K-GIR79")
+  ("glass", "SCHOTT-F", "F2HT")
+  ("glass", "OHARA-LAM", "LAM59")
+  ("main", "He", "Borzsonyi")
+  ⋮
+```
+```julia-repl
+julia> RefractiveIndexDatabase.search(book="Ag", shelf="main")
+Set{Tuple{String, String, String}} with 31 elements:
+  ("main", "AgGaSe2", "Harasaki-o")
+  ("main", "Ag", "Johnson")
+  ("main", "Ag", "Rakic-BB")
+  ("main", "AgCl", "Tilton")
+  ("main", "Ag", "Jiang")
+  ("main", "Ag", "Choi")
+  ("main", "AgGaS2", "Boyd-o")
+  ("main", "Ag3AsS3", "Hulme-e")
+  ("main", "AgGaS2", "Kato-e")
+  ("main", "AgGaS2", "Kato-o")
+  ("main", "Ag", "Ciesielski-Ge")
+  ("main", "Ag", "McPeak")
+  ("main", "AgGaSe2", "Boyd-e")
+  ("main", "Ag", "Ciesielski-Ni")
+  ("main", "Ag", "Werner")
+  ("main", "AgGaS2", "Boyd-e")
+  ("main", "AgBr", "Schröter")
+  ("main", "AgGaS2", "Takaoka-e")
+  ("main", "Ag", "Werner-DFT")
+  ("main", "Ag", "Yang")
+  ("main", "Ag", "Stahrenberg")
+  ("main", "Ag", "Windt")
+  ⋮
+```
+"""
+
+function search(; shelf::String = "", book::String = "", page::String = "")
+
+    if isempty(shelf) && isempty(book) && isempty(page)
+        return Set(keys(DB))
+    end
+
+    return Set(filter(
+        (key) -> isin(shelf, key[1]) && isin(book, key[2]) && isin(page, key[3]),
+        keys(DB)
+    ))
+end
+
+isin(query::String, key::String) = isempty(query) || occursin(query, key)
