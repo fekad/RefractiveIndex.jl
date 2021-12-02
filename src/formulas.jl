@@ -159,12 +159,12 @@ Retro formula:
     +  c_{4} \lambda^2
 ```
 """
-struct Retro{N} <: Formula
+struct Retro <: Formula
     λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+    coeffs::NTuple{4,Float64}
 end
 
-function (f::Retro{N})(λ) where {N}
+function (f::Retro)(λ)
     c = f.coeffs
     rhs = c[1] + c[2] * λ^2 / (λ^2 - c[3]) + c[4] * λ^2
     return sqrt((-2rhs - 1) / (rhs - 1))
@@ -178,12 +178,12 @@ n^2 = c_1
     + \frac{c_{4}(\lambda - c_{5})}{(\lambda - c_{5})^2 + c_{6}}
 ```
 """
-struct Exotic{N} <: Formula
+struct Exotic <: Formula
     λrange::NTuple{2,Float64}
-    coeffs::NTuple{N,Float64}
+    coeffs::NTuple{6,Float64}
 end
 
-function (f::Exotic{N})(λ) where {N}
+function (f::Exotic)(λ)
     c = f.coeffs
     rhs = c[1] + c[2] / (λ^2 - c[3]) + c[4] * (λ - c[5]) / ((λ - c[5])^2 + c[6])
     return sqrt(rhs)
