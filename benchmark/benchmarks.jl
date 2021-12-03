@@ -6,17 +6,19 @@ suite = BenchmarkGroup()
 suite["formula"] = BenchmarkGroup()
 suite["tabulated"] = BenchmarkGroup()
 
-let material, l
+let material, l, f
     material = get_material("other", "Mg-LiTaO3", "Moutzouris-o")
-    l = range(material.n.λrange..., length=1000)
-    suite["formula"]["MgLiTaO3"] = @benchmarkable $material.($l)
+    l = range(material.n.λrange..., length=10_000)
+    f = RefractiveIndex(material)
+    suite["formula"]["MgLiTaO3"] = @benchmarkable $f.($l)
 end
 
 
-let material, l
+let material, l, f
     material = get_material("main", "Ag", "Johnson")
-    l = range(extrema(material.λ)..., length=1000)
-    suite["tabulated"]["Ag"] = @benchmarkable $material.($l)
+    l = range(extrema(material.λ)..., length=10_000)
+    f = RefractiveIndex(material)
+    suite["tabulated"]["Ag"] = @benchmarkable $f.($l)
 end
 
 tune!(suite)

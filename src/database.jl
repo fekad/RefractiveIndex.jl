@@ -81,17 +81,15 @@ function parse(dict)
 
     if N == 1
 
-        data_type = data[1]["type"]
-
-        if data_type in keys(FORMULAS)
+        if data[1]["type"] in keys(FORMULAS)
 
             coeffs = str2tuple(data[1]["coefficients"])
             λrange = str2tuple(data[1]["wavelength_range"])
-            n = eval(FORMULAS[data_type])(λrange, coeffs)
+            n = eval(FORMULAS[data[1]["type"]])(λrange, coeffs)
 
             return FormulaN(meta, n)
 
-        elseif data_type == "tabulated n"
+        elseif data[1]["type"] == "tabulated n"
 
             raw = readdlm(IOBuffer(data[1]["data"]), ' ', Float64)
             λ = convert(Vector{Float64}, raw[:,1])
@@ -99,7 +97,7 @@ function parse(dict)
 
             return TabulatedN(meta, λ, n)
 
-        elseif data_type == "tabulated nk"
+        elseif data[1]["type"] == "tabulated nk"
 
             raw = readdlm(IOBuffer(data[1]["data"]), ' ', Float64)
             λ = convert(Vector{Float64}, raw[:,1])
@@ -112,19 +110,33 @@ function parse(dict)
 
     elseif N == 2
 
-        data_type = data[1]["type"]
-        coeffs = str2tuple(data[1]["coefficients"])
-        λrange = str2tuple(data[1]["wavelength_range"])
-        n = eval(FORMULAS[data_type])(λrange, coeffs)
+        if data[1]["type"] in keys(FORMULAS) && data[2]["type"] == "tabulated k"
 
-        raw = readdlm(IOBuffer(data[2]["data"]), ' ', Float64)
-        λ = convert(Vector{Float64}, raw[:,1])
-        k = convert(Vector{Float64}, raw[:,2])
+            coeffs = str2tuple(data[1]["coefficients"])
+            λrange = str2tuple(data[1]["wavelength_range"])
+            n = eval(FORMULAS[data[1]["type"]])(λrange, coeffs)
 
-        return FormulaNK(meta, n, λ, k)
+            raw = readdlm(IOBuffer(data[2]["data"]), ' ', Float64)
+            λ = convert(Vector{Float64}, raw[:,1])
+            k = convert(Vector{Float64}, raw[:,2])
 
+            return FormulaNTabulatedK(meta, n, λ, k)
+
+        elseif data[1]["type"] == "tabulated n" && data[2]["type"] == "tabulated k"
+
+            raw = readdlm(IOBuffer(data[1]["data"]), ' ', Float64)
+            λ_n = convert(Vector{Float64}, raw[:,1])
+            n = convert(Vector{Float64}, raw[:,2])
+
+            raw = readdlm(IOBuffer(data[2]["data"]), ' ', Float64)
+            λ_k = convert(Vector{Float64}, raw[:,1])
+            k = convert(Vector{Float64}, raw[:,2])
+
+            return TabulatedNTabulatedK(meta, λ_n, n, λ_k, k)
+        end
     end
 
+    error("unsupported data type")
 
 end
 
