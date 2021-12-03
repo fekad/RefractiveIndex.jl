@@ -190,18 +190,3 @@ function (f::Exotic)(λ)
 end
 
 
-struct TabulatedK <: Tabulated
-    λ::Vector{Float64}
-    k::Vector{Float64}
-    _itp::Spline1D
-
-    function TabulatedK(λ, k)
-        itp = Spline1D(λ, k, bc="error") # error on extrapolation
-        return new(λ, k, itp)
-    end
-end
-
-function (f::TabulatedK)(λ)
-    return f._itp(λ)
-end
-

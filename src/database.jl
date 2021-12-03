@@ -84,36 +84,44 @@ function parse(dict)
         data_type = data[1]["type"]
 
         if data_type in keys(FORMULAS)
+
             coeffs = str2tuple(data[1]["coefficients"])
             λrange = str2tuple(data[1]["wavelength_range"])
             n = eval(FORMULAS[data_type])(λrange, coeffs)
+
             return FormulaN(meta, n)
 
         elseif data_type == "tabulated n"
+
             raw = readdlm(IOBuffer(data[1]["data"]), ' ', Float64)
-            return TabulatedN(meta, eachcol(raw)...)
+            λ = convert(Vector{Float64}, raw[:,1])
+            n = convert(Vector{Float64}, raw[:,2])
+
+            return TabulatedN(meta, λ, n)
 
         elseif data_type == "tabulated nk"
+
             raw = readdlm(IOBuffer(data[1]["data"]), ' ', Float64)
-            return TabulatedNK(meta, eachcol(raw)...)
+            λ = convert(Vector{Float64}, raw[:,1])
+            n = convert(Vector{Float64}, raw[:,2])
+            k = convert(Vector{Float64}, raw[:,3])
+
+            return TabulatedNK(meta, λ, n, k)
 
         end
 
     elseif N == 2
 
-        @assert data[1]["type"] in keys(FORMULAS)
-        @assert data[2]["type"] == "tabulated k"
-
         data_type = data[1]["type"]
         coeffs = str2tuple(data[1]["coefficients"])
         λrange = str2tuple(data[1]["wavelength_range"])
+        n = eval(FORMULAS[data_type])(λrange, coeffs)
 
         raw = readdlm(IOBuffer(data[2]["data"]), ' ', Float64)
+        λ = convert(Vector{Float64}, raw[:,1])
+        k = convert(Vector{Float64}, raw[:,2])
 
-        n = eval(FORMULAS[data_type])(λrange, coeffs)
-        k = TabulatedK(eachcol(raw)...)
-
-        return FormulaNK(meta, n, k)
+        return FormulaNK(meta, n, λ, k)
 
     end
 
